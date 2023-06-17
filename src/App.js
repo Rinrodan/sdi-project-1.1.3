@@ -1,12 +1,37 @@
 import './App.css';
+import banner1 from './banner1.png'
+import person from './person.png'
+import React, { useState } from 'react';
 
 function App() {
+  const [actorResults, setActorResults] = useState([]);
+
+  const handleActorClick = (actorName) => {   //the user enters the actors name in to the search box below, <div className="actor-name-container">
+    fetch(`https://api.tvmaze.com/search/people?q=${actorName}`)
+      .then(response => response.text())
+      .then(text => {
+        if (text === 'null') {
+          console.error('Invalid JSON response:', text);
+      } else {
+        const actor = JSON.parse(text);
+        setActorResults(actor);
+        console.log(actor);
+      }
+    })
+    .catch(error => {
+      console.error('Error:', error);
+    });
+};
   return (
     <div className="App">
-      <header className="App-header">
-        <h1>hello</h1>
-      </header>
-      <main>
+      <div className="row">
+        <header className="main-header" role="banner">
+          <img src={banner1} className="banner" alt="Banner"/>
+        </header>
+      </div>
+      <main className='main'>
+        
+        <h1>Costar Search</h1>
         <section className="actorsearchcontainer">
           <div className="actor-name-container">
             <label className="text">
@@ -15,7 +40,7 @@ function App() {
             <input type="text" 
                   id="actorName" />
           </div>
-          <div className="number-radio-buttons text">
+          {/* <div className="number-radio-buttons text">
             <input type="radio" 
                     name="2-4" 
                     title="asdf"/> 
@@ -24,38 +49,32 @@ function App() {
                     name="2-4" 
                     title="asdf"/>
             <label className="text">2-4</label>
-          </div>
+          </div> */}
           <div className="button-container">
-            <button className="button text"
-                    type="button"
-                    value="Search">
-                      {/* <button className="button text"
-                    type="button"
-                    value="Search"
-                    onClick={() => handleActorClick(document.getElementById('actorName').value)}></button> */}
+            <button className="searchbutton text" onClick={() => handleActorClick(document.getElementById('actorName').value)}>
               Search
             </button>
           </div>
         </section>
-        {/* <section className="actorresultscontainer">
+        <section className="actorresultscontainer">
           {actorResults.map(actor => (
-            <div key={actor.person.id}>
-              <button className="button text"
+            <div key={actor.person.id} className='acttorresultselection'>
+              {/* <button className="button text"
                     type="button"
-                    value= "actorId"></button>
+                    value= "actorId"></button> */}
               <button className="button text"
                     type="button"
                     value= "actorId"
-                    id={actor.person.id}
-                    onClick={() => handleCreditClick(actor.person.id)}>   
+                    id={actor.person.id}>
+                    {/* onClick={() => handleCreditClick(actor.person.id)}   */}
                     
               <h2 id="actorId"value="actor.person.name">{actor.person.name}</h2>
               
-              <img src={actor.person.image.medium} alt={actor.person.name} />
+              {/* <img src={actor.person.image.medium || actor.person.image.original || {person}} alt={actor.person.name} /> */}
               </button>
             </div>
           ))}
-        </section> */}
+        </section>
         {/* <section className="actor-results-container">
           {actorCredits.map(show => (
             <div key={show.id}>
