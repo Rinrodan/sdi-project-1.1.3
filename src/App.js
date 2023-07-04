@@ -1,10 +1,25 @@
 import './App.css';
 import banner1 from './banner1.png'
-import person from './person.png'
-import React, { useState } from 'react';
+// import person from './person.png'
+import React, { useState, useEffect } from 'react';
+
+// import RenderCastDuplicates from './components/RenderCastDuplicates';
+// import RenderActorShows from './components/RenderActorShows';
+
+
 
 function App() {
-  const [actorResults, setActorResults] = useState([]);
+  const [actorResults, setActorResults] = useState([]); 
+  // << LINE 24 << handleActorClick >> this is the results of the search bar, first names only
+  const [actorId, setActorId] =useState([]); 
+  // LINE 96 << handleActorSelectClick >> this is chaged by selecting an actor from the results
+  // const [actorShows, setActorShows] = useState([]);
+  const [shows, setShows] = useState([]); 
+  //these are the shows that the selected actor has been in and used to return the entire cast
+  const [actorDetails, setActorDetails] =useState([]); 
+  // line 50 << setActorDetails >> the actor that is selected from the search results
+  // console.log(actorId);
+  
 
   const handleActorClick = (actorName) => {   //the user enters the actors name in to the search box below, <div className="actor-name-container">
     fetch(`https://api.tvmaze.com/search/people?q=${actorName}`)
@@ -15,13 +30,81 @@ function App() {
       } else {
         const actor = JSON.parse(text);
         setActorResults(actor);
-        console.log(actor);
+        // console.log(actor);
       }
     })
     .catch(error => {
       console.error('Error:', error);
     });
 };
+
+useEffect(() => {
+  if (actorId) {
+    fetch(`https://api.tvmaze.com/people/${actorId}/`)
+      .then((response) => response.json())
+      .then((data) => {
+        if (data === 'null') {
+          console.error('Invalid JSON response:', data);
+        } else {
+          const selectedActor = JSON.parse(data);
+          setActorDetails(selectedActor);
+        }
+      })
+      .catch((error) => {
+        console.error('Error fetching actor details:', error);
+      });
+
+    fetch(`https://api.tvmaze.com/people/${actorId}/castcredits`)
+      .then((response) => response.json())
+      .then((data) => {
+        const showCodes = data
+          .map((item) => {
+            const href = item._links.show.href;
+            const matches = href.match(/\/(\d+)$/);
+            if (matches) {
+              return matches[1];
+            }
+          })
+          .filter(Boolean);
+
+        Promise.all(
+          showCodes.map((code) =>
+            fetch(`https://api.tvmaze.com/shows/${code}?embed=cast`)
+              .then((response) => response.json())
+              .then((show) => ({
+                id: show.id,
+                name: show.name,
+                image: show.image.medium,
+                officialSite: show.officialSite,
+                cast: show._embedded.cast.map((item) => ({
+                  id: item.person.id,
+                  name: item.person.name,
+                  image: item.person.image.medium,
+                }))
+              }))
+              .catch((error) => {
+                console.error(`Error fetching show with code ${code}:`, error);
+                return null; // Return null for failed requests
+              })
+          )
+        ).then((shows) => {
+          setShows(shows.filter(Boolean)); // Filter out null values from failed requests
+        });
+      })
+      .catch((error) => {
+        console.error('Error fetching cast credits:', error);
+      });
+  } else {
+    setActorDetails([]);
+    setShows([]);
+  }
+}, [actorId]);
+
+function handleActorSelectClick(actorId) {
+  setActorId(actorId);
+}
+
+
   return (
     <div className="App">
       <div className="row">
@@ -56,49 +139,41 @@ function App() {
             </button>
           </div>
         </section>
-        <section className="actorresultscontainer">
+        <section className="actorSelectionSection">
           {actorResults.map(actor => (
-            <div key={actor.person.id} className='acttorresultselection'>
+            <div key={actor.person.id} className='actorSelectionContainer'>
               {/* <button className="button text"
                     type="button"
                     value= "actorId"></button> */}
               <button className="button text"
                     type="button"
-                    value= "actorId"
-                    id={actor.person.id}>
-                    {/* onClick={() => handleCreditClick(actor.person.id)}   */}
-                    
-              <h2 id="actorId"value="actor.person.name">{actor.person.name}</h2>
-              
-              {/* <img src={actor.person.image.medium || actor.person.image.original || {person}} alt={actor.person.name} /> */}
+                    value= {actor.person.id}
+                    id="actorSelection"
+                    onClick={() => handleActorSelectClick(document.getElementById('actorSelection').value)}>  
+              <h2 id={actor.person.id} value={actor.person.name}>{actor.person.name}</h2> {/* did not inlcude image because some search results do not have an image and it would break */}
               </button>
             </div>
           ))}
+         
+          </section>          
+        <section>
+          <ul>
+            {shows.map(show => {
+              return (
+                <div key={show.id} className='show-card-container'>
+                   <div key={actorId} className='selectedActor card'>
+                    <h2 id="mainActorTitle" value="actorName"></h2>
+                  </div>
+                  {show.name} 
+                </div>
+              );
+            })}
+          </ul>
         </section>
-        {/* <section className="actor-results-container">
-          {actorCredits.map(show => (
-            <div key={show.id}>
-              <button className="button text"
-                    type="button"
-                    value="Search"
-                    onClick={() => handleCreditClick(document.getElementById('.person.id').value)}>
-              <h2>{show.name}</h2>
-              </button>
-            </div> 
-          ))}
-          <div className="actor-grid">
-        {groupedCast.map(person => (
-          <div key={person.id} className='actorCard'>
-            <img className='actorCardImage' src={person.image} alt={person.name} />
-            <h2>{person.name}</h2>
-            <p>Appeared in: {person.shows.join(', ')}</p>
-          </div>
-        ))}
-      </div>
-        </section> */}
       </main>
     </div>
-  );
+  )
 }
 
 export default App;
+// export { ActorShowsContext, ActorShowsProvider };

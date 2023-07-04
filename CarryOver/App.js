@@ -52,21 +52,21 @@ function App() {
     { id: 425, name: 'The Passing Bells', img: 'https://static.tvmaze.com/uploads/images/medium_portrait/2/7487.jpg', url: 'https://www.tvmaze.com/shows/425/the-passing-bells', summary: '<p>World War I drama. At the outbreak of war, two teenage boys - one German and one British - defy their parents to sign up.</p>' }
   ];
 
-  const cast = GetCast({ showCreditIds });
-  <GetCast cast={cast} />
+  // const cast = GetCast({ showCreditIds });
+  // <GetCast cast={cast} />
 
-  const groupedCast = cast.reduce((acc, person) => {
-    const existingPerson = acc.find(p => p.id === person.id);
-    if (existingPerson) {
-      existingPerson.shows.push(person.show);
-    } else {
-      acc.push({
-        ...person,
-        shows: [person.show]
-      });
-    }
-    return acc;
-  }, []);
+  // const groupedCast = cast.reduce((acc, person) => {
+  //   const existingPerson = acc.find(p => p.id === person.id);
+  //   if (existingPerson) {
+  //     existingPerson.shows.push(person.show);
+  //   } else {
+  //     acc.push({
+  //       ...person,
+  //       shows: [person.show]
+  //     });
+  //   }
+  //   return acc;
+  // }, []);
   
 
 

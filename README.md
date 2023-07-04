@@ -1,3 +1,30 @@
+CoStarSearch logic Flow
+
+1. actor name text field 
+2. click search
+    - App.js actorName is sent onClick={() => handleActorClick(document.getElementById('actorName').value)}>
+    - handleActorClick returns setActorResults => actorResults 'array'
+    - return <map over actorResults array> 10 actors names on buttons
+3. click on actor
+    - app.js setActorId => actorId 
+    - useState changed, actorSearch.js
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 # Getting Started with Create React App
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).

@@ -1,0 +1,150 @@
+import './App.css';
+import banner1 from './banner1.png'
+// import person from './person.png'
+import React, { useState, useEffect } from 'react';
+
+// import RenderCastDuplicates from './components/RenderCastDuplicates';
+// import RenderActorShows from './components/RenderActorShows';
+
+
+
+function App() {
+  const [actorResults, setActorResults] = useState([]);
+  const [actorId, setActorId] =useState([]);
+  const [actorShows, setActorShows] = useState([]);
+  const [actorDetails, setActorDetails] =useState([]);
+  // console.log(actorId);
+
+useEffect(() => {
+if (actorId) {
+    
+    fetch(`https://api.tvmaze.com/people/${actorId}/castcredits`)
+    .then((response) => response.json())
+    .then((data) => {
+        const showCodes = data
+        .map((item) => {
+            const href = item._links.show.href;
+            const matches = href.match(/\/(\d+)$/);
+            if (matches) {
+            return matches[1];
+            }
+        })
+        .filter(Boolean);
+
+        Promise.all(
+        showCodes.map((code) =>
+            fetch(`https://api.tvmaze.com/shows/${code}?embed=cast`)
+            .then((response) => response.json())
+            .then((show) => ({
+                id: show.id,
+                name: show.name,
+                image: show.image.medium,
+                officialSite: show.officialSite,
+                cast: show._embedded.cast.map((item) => ({
+                id: item.person.id,
+                name: item.person.name,
+                image: item.person.image.medium,
+                }))
+            }))
+        )
+        ).then((shows) => {
+        setShows(shows);
+        });
+    });
+} else {
+    setShows([]);
+}
+}, [actorId]);
+
+function handleActorSelectClick(actorId) {
+setActorId(actorId);
+}
+// function selectedActorSet () {
+// fetch(`https://api.tvmaze.com/people/${actorId}/`)
+//   .then((response) => response.json())
+//   .then((data) => {
+//     if (data === 'null') {
+//       console.error('Invalid JSON response:', data);
+//   } else {
+//     const selectedActor = JSON.parse(data);
+//     setActors(selectedActor);
+//      .then((selectedActor) => {
+//       console.log(selectedActor);
+//       setActorDetails(selectedActor);
+//     })
+// }})
+
+// console.log(actorShows)
+
+return (
+<div className="App">
+    <div className="row">
+    <header className="main-header" role="banner">
+        <img src={banner1} className="banner" alt="Banner"/>
+    </header>
+    </div>
+    <main className='main'>
+    
+    <h1>Costar Search</h1>
+    <section className="actorsearchcontainer">
+        <div className="actor-name-container">
+        <label className="text">
+            Actor's Name:
+        </label>
+        <input type="text" 
+                id="actorName" />
+        </div>
+        {/* <div className="number-radio-buttons text">
+        <input type="radio" 
+                name="2-4" 
+                title="asdf"/> 
+        <label>over 4</label>
+            <input type="radio" 
+                name="2-4" 
+                title="asdf"/>
+        <label className="text">2-4</label>
+        </div> */}
+        <div className="button-container">
+        <button className="searchbutton text" onClick={() => handleActorClick(document.getElementById('actorName').value)}>
+            Search
+        </button>
+        </div>
+    </section>
+    <section className="actorSelectionSection">
+        {actorResults.map(actor => (
+        <div key={actor.person.id} className='actorSelectionContainer'>
+            {/* <button className="button text"
+                type="button"
+                value= "actorId"></button> */}
+            <button className="button text"
+                type="button"
+                value= {actor.person.id}
+                id="actorSelection"
+                onClick={() => handleActorSelectClick(document.getElementById('actorSelection').value)}>  
+            <h2 id={actor.person.id} value={actor.person.name}>{actor.person.name}</h2> {/* did not inlcude image because some search results do not have an image and it would break */}
+            </button>
+        </div>
+        ))}
+        
+        </section>          
+    <section>
+        <ul>
+        {actorShows.map(show => {
+            return (
+            <div key={show.id} className='show-card-container'>
+                <div key={actorId} className='selectedActor card'>
+                <h2 id="mainActorTitle" value="actorName"></h2>
+                </div>
+                {show.name} 
+            </div>
+            );
+        })}
+        </ul>
+    </section>
+    </main>
+</div>
+)
+}
+
+export default App;
+// export { ActorShowsContext, ActorShowsProvider };
