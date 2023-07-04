@@ -30,6 +30,8 @@ function App() {
       } else {
         const actor = JSON.parse(text);
         setActorResults(actor);
+        setActorDetails([]);
+        setShows([]);
         // console.log(actor);
       }
     })
@@ -145,26 +147,26 @@ function handleActorSelectClick(actorId) {
               {/* <button className="button text"
                     type="button"
                     value= "actorId"></button> */}
-              <button className="button text"
+              <button className="button text shadow-small actor-button"
                     type="button"
                     value= {actor.person.id}
                     id="actorSelection"
                     onClick={() => handleActorSelectClick(document.getElementById('actorSelection').value)}>  
-              <h2 id={actor.person.id} value={actor.person.name}>{actor.person.name}</h2> {/* did not inlcude image because some search results do not have an image and it would break */}
+              <p id={actor.person.id} value={actor.person.name}>{actor.person.name}</p> {/* did not inlcude image because some search results do not have an image and it would break */}
               </button>
             </div>
           ))}
          
           </section>          
-        <section>
+        <section className='show-card-results'>
           <ul>
             {shows.map(show => {
               return (
                 <div key={show.id} className='show-card-container'>
                    <div key={actorId} className='selectedActor card'>
-                    <h2 id="mainActorTitle" value="actorName"></h2>
+                    <p id="showtitle" value="showName">{show.name} </p>
                   </div>
-                  {show.name} 
+                  
                 </div>
               );
             })}
